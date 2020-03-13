@@ -27,7 +27,9 @@ class BaseCli:
 
 
 class CliUseradm(BaseCli):
-    def __init__(self, containers_namespace="backend-tests", container_manager=None):
+    def __init__(
+        self, containers_namespace="backend-tests", container_manager=None
+    ):
         BaseCli.__init__(
             self, "mender-useradm", containers_namespace, container_manager
         )
@@ -44,7 +46,14 @@ class CliUseradm(BaseCli):
             raise RuntimeError("no runnable binary found in mender-useradm")
 
     def create_user(self, username, password, tenant_id=""):
-        cmd = [self.path, "create-user", "--username", username, "--password", password]
+        cmd = [
+            self.path,
+            "create-user",
+            "--username",
+            username,
+            "--password",
+            password,
+        ]
 
         if tenant_id != "":
             cmd += ["--tenant-id", tenant_id]
@@ -62,7 +71,9 @@ class CliUseradm(BaseCli):
 
 
 class CliTenantadm(BaseCli):
-    def __init__(self, containers_namespace="backend-tests", container_manager=None):
+    def __init__(
+        self, containers_namespace="backend-tests", container_manager=None
+    ):
         BaseCli.__init__(
             self, "mender-tenantadm", containers_namespace, container_manager
         )
@@ -97,7 +108,9 @@ class CliTenantadm(BaseCli):
 
 
 class CliDeviceauth(BaseCli):
-    def __init__(self, containers_namespace="backend-tests", container_manager=None):
+    def __init__(
+        self, containers_namespace="backend-tests", container_manager=None
+    ):
         BaseCli.__init__(
             self, "mender-device-auth", containers_namespace, container_manager
         )

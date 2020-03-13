@@ -38,6 +38,8 @@ class Artifacts:
         scripts=[],
         global_flags="",
         version=None,
+        depends={},
+        provides={},
     ):
         signed_arg = ""
 
@@ -46,7 +48,9 @@ class Artifacts:
 
         if signed:
             private_key = "../extra/signed-artifact-client-testing/private.key"
-            assert os.path.exists(private_key), "private key for testing doesn't exist"
+            assert os.path.exists(
+                private_key
+            ), "private key for testing doesn't exist"
             signed_arg = "-k %s" % (private_key)
 
         cmd = "%s %s  write rootfs-image -f %s -t %s -n %s -o %s %s %s" % (
@@ -62,6 +66,12 @@ class Artifacts:
         for script in scripts:
             cmd += " -s %s" % script
 
+        for key, value in depends.items():
+            cmd += " -d %s:%s" % (key, value)
+
+        for key, value in provides.items():
+            cmd += " -p %s:%s" % (key, value)
+
         logger.info("Running: " + cmd)
         subprocess.check_call(cmd, shell=True)
 
@@ -75,7 +85,8 @@ class Artifacts:
         conf = {}
 
         output = subprocess.check_output(
-            "debugfs -R 'cat /etc/mender/mender.conf' " + "%s" % image, shell=True
+            "debugfs -R 'cat /etc/mender/mender.conf' " + "%s" % image,
+            shell=True,
         )
         import json
 

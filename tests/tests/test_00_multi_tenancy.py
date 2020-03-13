@@ -18,7 +18,7 @@ import time
 
 from .. import conftest
 from ..common_setup import enterprise_no_client
-from .common_update import update_image, update_image_failed, common_update_procedure
+from .common_update import update_image, common_update_procedure
 from ..MenderAPI import auth, auth_v2, deploy, image, logger, inv
 from .mendertesting import MenderTesting
 from . import artifact_lock
@@ -40,7 +40,9 @@ class TestMultiTenancyEnterprise(MenderTesting):
         # create a new client with an incorrect token set
         enterprise_no_client.new_tenant_client("mender-client", wrong_token)
 
-        mender_device = MenderDevice(enterprise_no_client.get_mender_clients()[0])
+        mender_device = MenderDevice(
+            enterprise_no_client.get_mender_clients()[0]
+        )
 
         mender_device.ssh_is_opened()
         mender_device.run(
@@ -50,7 +52,9 @@ class TestMultiTenancyEnterprise(MenderTesting):
 
         for _ in range(5):
             time.sleep(5)
-            auth_v2.get_devices(expected_devices=0)  # make sure device not seen
+            auth_v2.get_devices(
+                expected_devices=0
+            )  # make sure device not seen
 
         # setting the correct token makes the client visible to the backend
         mender_device.run(
@@ -156,10 +160,14 @@ class TestMultiTenancyEnterprise(MenderTesting):
                     )
                     break
                 else:
-                    logger.info("device [%s] found in inventory..." % (device_id))
+                    logger.info(
+                        "device [%s] found in inventory..." % (device_id)
+                    )
                 time.sleep(0.5)
             else:
-                assert False, "decommissioned device still available in inventory"
+                assert (
+                    False
+                ), "decommissioned device still available in inventory"
 
     def test_multi_tenancy_deployment(self, enterprise_no_client):
         """ Simply make sure we are able to run the multi tenancy setup and
@@ -248,3 +256,95 @@ class TestMultiTenancyEnterprise(MenderTesting):
                 'journalctl -u mender-client | grep "deployment aborted at the backend"',
                 wait=600,
             )
+
+    def test_update_provides_depends(self, enterprise_no_client):
+        """
+        Perform two consecutive updates, the first adds virtual provides
+        to the artifact and the second artifact depends on these provides.
+        """
+
+        DEMO_POLL_INTERVAL = 5
+        IMAGE_NAME = "core-image-full-cmdline-qemux86-64.ext4"
+
+        # Create tenant user
+        auth.reset_auth_token()
+        auth.new_tenant("admin", "bob@builder.org", "secret-service")
+        token = auth.current_tenant["tenant_token"]
+
+        # Create client setup with tenant token
+        enterprise_no_client.new_tenant_client("mender-client", token)
+        mender_device = MenderDevice(
+            enterprise_no_client.get_mender_clients()[0]
+        )
+        mender_device.host_ip = (
+            enterprise_no_client.get_virtual_network_host_ip()
+        )
+
+        # Wait for ssh to be open
+        mender_device.ssh_is_opened()
+        # Check that the device has authorized with the backend.
+        device = auth_v2.get_devices(expected_devices=1)
+        device_ids = [device[0]["id"]]
+        auth_v2.accept_devices(1)
+        assert len(auth_v2.get_devices_status("accepted")) == 1
+
+        # Update client with and artifact with custom provides
+        def prepare_provides_artifact(artifact_filename, artifact_id):
+            artifact = None
+            try:
+                f = open(artifact_filename, "w+b")
+                artifact = image.make_rootfs_artifact(
+                    IMAGE_NAME,
+                    device_type="qemux86-64",
+                    artifact_name=artifact_id,
+                    artifact_file_created=f,
+                    provides={"foo": "bar"},
+                )
+            finally:
+                f.close()
+            return artifact
+
+        update_image(
+            mender_device,
+            mender_device.host_ip,
+            make_artifact=prepare_provides_artifact,
+        )
+
+        # Issue another update which depends on the custom provides
+        def prepare_depends_artifact(artifact_filename, artifact_id):
+            artifact = None
+            try:
+                f = open(artifact_filename, "w+b")
+                artifact = image.make_rootfs_artifact(
+                    IMAGE_NAME,
+                    device_type="qemux86-64",
+                    artifact_name=artifact_id,
+                    artifact_file_created=f,
+                    depends={"foo": "bar"},
+                )
+            finally:
+                f.close()
+            return artifact
+
+        update_image(
+            mender_device,
+            mender_device.host_ip,
+            make_artifact=prepare_depends_artifact,
+        )
+
+        # Issue a third update with the same update as previous, this time
+        # with insufficient provides -> no artifact status
+        deployment_id, _ = common_update_procedure(
+            make_artifact=prepare_depends_artifact, verify_status=False
+        )
+
+        # Retry for at most 60 seconds checking for deployment status update
+        stat = None
+        for i in range(60):
+            time.sleep(1)
+            stat = deploy.get_statistics(deployment_id)
+            if stat.get("pending") == 0:
+                break
+
+        assert stat is not None
+        assert stat.get("noartifact") == 1
