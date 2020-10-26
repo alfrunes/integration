@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+  <manifest>
+  <default sync-j="8" revision="master"/>
+
+  <remote fetch="ssh://git@github.com/mendersoftware" name="origin"/>
+
+  <project name="integration"   remote="origin" revision="master" path="mender/integration"/>
+  <project name="deployments"   remote="origin" revision="master" path="mender/deployments"/>
+  <project name="deviceadm"     remote="origin" revision="master" path="mender/deviceadm"/>
+  <project name="deviceauth"    remote="origin" revision="master" path="mender/deviceauth"/>
+  <project name="deviceconnect" remote="origin" revision="master" path="mender/deviceconnect"/>
+  <project name="inventory"     remote="origin" revision="master" path="mender/inventory"/>
+  <project name="useradm"       remote="origin" revision="master" path="mender/useradm"/>
+  <project name="tenantadm"     remote="origin" revision="master" path="mender/tenantadm"/>
+  <project name="workflows"     remote="origin" revision="master" path="mender/workflows"/>
+
+  <!-- Private repositories -->
+  <project name="auditlogs"              remote="origin" revision="master" path="mender/auditlogs"/>
+  <project name="deployments-enterprise" remote="origin" revision="master" path="mender/deployments-enterprise"/>
+  <project name="inventory-enterprise"   remote="origin" revision="master" path="mender/inventory-enterprise"/>
+  <project name="useradm-enterprise"     remote="origin" revision="master" path="mender/useradm-enterprise"/>
+  <project name="workflows-enterprise"   remote="origin" revision="master" path="mender/workflows-enterprise"/>
+
+  <!-- Gateway and frontend -->
+  <project name="gui"           remote="origin" revision="master" path="mender/gui"/>
+  <project name="mender-api-gateway-docker" remote="origin" revision="master" path="mender/mender-api-gateway-docker"/>
+
+  </manifest>

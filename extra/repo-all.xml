@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+  <manifest>
+  <default sync-j="8" revision="master"/>
+
+  <remote fetch="ssh://git@github.com/mendersoftware" name="origin"/>
+
+  <!-- Open-source backend -->
+  <project name="integration"   remote="origin" revision="master" path="integration"/>
+  <project name="deployments"   remote="origin" revision="master" path="deployments"/>
+  <project name="deviceadm"     remote="origin" revision="master" path="deviceadm"/>
+  <project name="deviceauth"    remote="origin" revision="master" path="deviceauth"/>
+  <project name="deviceconnect" remote="origin" revision="master" path="deviceconnect"/>
+  <project name="inventory"     remote="origin" revision="master" path="inventory"/>
+  <project name="useradm"       remote="origin" revision="master" path="useradm"/>
+  <project name="tenantadm"     remote="origin" revision="master" path="tenantadm"/>
+  <project name="workflows"     remote="origin" revision="master" path="workflows"/>
+  <project name="create-artifact-worker" remote="origin" revision="master" path="create-artifact-worker"/>
+
+  <!-- Private repositories -->
+  <project name="auditlogs"              remote="origin" revision="master" path="auditlogs"/>
+  <project name="deployments-enterprise" remote="origin" revision="master" path="deployments-enterprise"/>
+  <project name="inventory-enterprise"   remote="origin" revision="master" path="inventory-enterprise"/>
+  <project name="mtls-ambassador"        remote="origin" revision="master" path="mtls-ambassador"/>
+  <project name="useradm-enterprise"     remote="origin" revision="master" path="useradm-enterprise"/>
+  <project name="workflows-enterprise"   remote="origin" revision="master" path="workflows-enterprise"/>
+
+  <!-- Gateway and frontend -->
+  <project name="gui"                       remote="origin" revision="master" path="gui"/>
+  <project name="mender-api-gateway-docker" remote="origin" revision="master" path="mender-api-gateway-docker"/>
+
+  <!-- Client++ repositories -->
+  <project name="mender"              remote="origin" revision="master" path="mender"/>
+  <project name="mender-binary-delta" remote="origin" revision="master" path="mender-binary-delta"/>
+  <project name="mender-shell"        remote="origin" revision="master" path="mender-shell"/>
+
+
+  <!-- Misc -->
+  <project name="mender-artifact"        remote="origin" revision="master" path="mender-artifact"/>
+  <project name="mender-cli"             remote="origin" revision="master" path="mender-cli"/>
+
+  </manifest>
