@@ -31,6 +31,10 @@ variables:
     description: "Docker version to use in jobs"
     value: "27"
 
+  MENDER_TAG:
+    description: "Docker tag for running integration tests"
+    value: main
+
 .publish:versions:
   stage: publish
   image: python:slim
