@@ -12,4 +12,5 @@ test:integration:
     - source /.venv/bin/activate
     - pip3 install -r ./tests/requirements-python/python-requirements.txt
   script:
-    - ./tests/run.sh
+    - cd tests
+    - ./run.sh
