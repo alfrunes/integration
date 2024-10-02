@@ -8,6 +8,6 @@ iptables
 jq
 make
 openssh-client
-openssl1.1-compat
+openssl
 py-pip
 python3
