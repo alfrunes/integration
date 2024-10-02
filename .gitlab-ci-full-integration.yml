@@ -1,0 +1,12 @@
+test:integration:
+  rules:
+    - if: $RUN_TESTS_FULL_INTEGRATION == "true"
+  services:
+    - docker:${DOCKER_VERSION}-dind
+  image: docker:${DOCKER_VERSION}-cli
+  stage: test
+  before_script:
+    - apk add $(cat ./tests/requirements-system/apk-requirements.txt)
+    - pip3 install -r ./tests/requirements-python/python-requirements.txt
+  script:
+    - ./tests/run.sh
