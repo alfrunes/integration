@@ -7,6 +7,9 @@ test:integration:
   stage: test
   before_script:
     - apk add $(cat ./tests/requirements-system/apk-requirements.txt)
+    - apk add py3-virtualenv
+    - python -m virtualenv /.venv
+    - source /.venv/bin/activate
     - pip3 install -r ./tests/requirements-python/python-requirements.txt
   script:
     - ./tests/run.sh
