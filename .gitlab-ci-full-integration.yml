@@ -5,6 +5,8 @@ test:integration:
     - docker:${DOCKER_VERSION}-dind
   image: docker:${DOCKER_VERSION}-cli
   stage: test
+  tags:
+    - mender-qa-worker-integration-tests
   before_script:
     - apk add $(cat ./tests/requirements-system/apk-requirements.txt)
     - apk add py3-virtualenv
