@@ -24,8 +24,13 @@ variables:
     description: "Run staging integration tests"
     value: "false"
   RUN_TESTS_FULL_INTEGRATION:
-    description: "Run full integration tests"
+    description: |
+      Run full integration tests.
+      NOTE: Can only run on protected branches
     value: "false"
+    options:
+      - "false"
+      - "true"
 
   DOCKER_VERSION:
     description: "Docker version to use in jobs"
