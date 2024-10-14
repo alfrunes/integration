@@ -4,6 +4,7 @@ curl
 e2fsprogs-extra
 g++
 gcompat
+gcompat
 git
 iptables
 jq
@@ -13,3 +14,4 @@ openssh-client
 openssl
 py3-pip
 python3-dev
+zstd
