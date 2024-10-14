@@ -19,9 +19,11 @@ test:integration:
     - python -m virtualenv /.venv
     - source /.venv/bin/activate
     - pip3 install -r ./tests/requirements-python/python-requirements.txt
+    # Gitlab CI tends to set these DOCKER_ variables internally.
+    # dind also creates the unix socket at /var/run/docker.sock
+    - unset DOCKER_HOST DOCKER_TLS_VERIFY DOCKER_CERT_PATH
     # Run dockerd and wait it to start
     # https://github.com/krallin/tini#subreaping
-    - unset DOCKER_HOST
     - screen -d -m /usr/bin/env TINI_SUBREAPER=true dockerd-entrypoint.sh
     - |
       MAX_WAIT=300
