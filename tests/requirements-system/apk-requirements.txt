@@ -1,14 +1,15 @@
 bash
 cmake
 curl
+e2fsprogs-extra
 g++
 gcompat
 git
 iptables
 jq
+libffi-dev
 make
 openssh-client
 openssl
 py3-pip
 python3-dev
-libffi-dev
