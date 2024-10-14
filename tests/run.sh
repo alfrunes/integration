@@ -79,20 +79,25 @@ function get_requirements() {
     fi
 
     echo "Detected Mender branch: $MENDER_BRANCH"
-    echo "Detected mender-artifact branch: $MENDER_ARTIFACT_BRANCH"
     echo "Detected mender-cli branch: $MENDER_CLI_BRANCH"
 
     # Download the tools
-    curl --fail "https://downloads.mender.io/mender-artifact/${MENDER_ARTIFACT_BRANCH}/linux/mender-artifact" \
-         -o downloaded-tools/mender-artifact \
-         -z downloaded-tools/mender-artifact
-
+    #FIXME: The distributed binaries are compiled for OpenSSL 1.1
+    #       As a workaround, we're installing the debian package (noble distribution).
+    EXTRACT_DIR=$(mktemp -d mender-artifact.XXXXXX)
+    curl --fail \
+        https://downloads.mender.io/repos/debian/pool/main/m/mender-artifact/mender-artifact_3.11.2-1%2bubuntu%2bnoble_amd64.deb \
+        -o "$EXTRACT_DIR/mender-artifact.deb"
     if [ $? -ne 0 ]; then
         echo "failed to download mender-artifact"
         exit 1
     fi
 
-    chmod +x downloaded-tools/mender-artifact
+    ar x --output "$EXTRACT_DIR" "$EXTRACT_DIR/mender-artifact.deb"
+    zstd -d "$EXTRACT_DIR/data.tar.zst"
+    tar -C $EXTRACT_DIR -xvf "$EXTRACT_DIR/data.tar" ./usr/bin/mender-artifact
+    mv $EXTRACT_DIR/usr/bin/mender-artifact downloaded-tools/mender-artifact
+    rm -rf $EXTRACT_DIR
 
     curl --fail "https://downloads.mender.io/mender-cli/${MENDER_CLI_BRANCH}/linux/mender-cli" \
          -o downloaded-tools/mender-cli \
