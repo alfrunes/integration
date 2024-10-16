@@ -230,8 +230,6 @@ start_server() {
         if [ $? != 0 ] || [ -z "$container_ip" ]; then
             echo "Failed to obtain address of container ${container_name}."
             exit 1
-        elif [ -n "$container_ip" ]; then
-            break
         fi
 
         while :
