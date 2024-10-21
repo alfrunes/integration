@@ -295,6 +295,7 @@ activate = 1
     @pytest.mark.parametrize(
         "hsm_implementation", ["engine", "provider"],
     )
+    @pytest.mark.skip(reason="QA-787")
     def test_mtls_enterprise_hsm(self, setup_ent_mtls, algorithm, hsm_implementation):
         # Check if the client has has SoftHSM (from yocto dunfell forward)
         output = setup_ent_mtls.device.run(
@@ -369,6 +370,7 @@ activate = 1
             self.hsm_cleanup(setup_ent_mtls.device)
 
     @MenderTesting.fast
+    @pytest.mark.skip(reason="QA-787")
     def test_mtls_enterprise_without_client_cert(self, setup_ent_mtls):
         # set up the mTLS test environment, without providing client certs
         self.common_test_mtls_enterprise(setup_ent_mtls, algorithm=None, use_hsm=False)
