@@ -93,9 +93,7 @@ function get_requirements() {
         exit 1
     fi
 
-    ar x --output "$EXTRACT_DIR" "$EXTRACT_DIR/mender-artifact.deb"
-    zstd -d "$EXTRACT_DIR/data.tar.zst"
-    tar -C $EXTRACT_DIR -xvf "$EXTRACT_DIR/data.tar" ./usr/bin/mender-artifact
+    dpkg -x "$EXTRACT_DIR/mender-artifact.deb" "$EXTRACT_DIR"
     mv $EXTRACT_DIR/usr/bin/mender-artifact downloaded-tools/mender-artifact
     rm -rf $EXTRACT_DIR
 
