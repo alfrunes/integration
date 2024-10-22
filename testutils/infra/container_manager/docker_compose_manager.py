@@ -13,11 +13,10 @@
 #    limitations under the License.
 
 import logging
+import os
 import socket
 import subprocess
 import time
-
-from os import walk
 
 from testutils.common import wait_until_healthy
 
@@ -97,6 +96,10 @@ class DockerComposeNamespace(DockerComposeBaseNamespace):
         COMPOSE_FILES_PATH
         + "/extra/recaptcha-testing/tenantadm-test-recaptcha-conf.yml",
         COMPOSE_FILES_PATH + "/extra/smtp-testing/smtp.mock.yml",
+    ]
+
+    COMPAT_FILES = [
+        COMPOSE_FILES_PATH + "/extra/integration-testing/test-compat/docker-compose.yml"
     ]
     COMPAT_FILES_ROOT = COMPOSE_FILES_PATH + "/extra/integration-testing/test-compat"
     COMPAT_FILES_TEMPLATE = COMPAT_FILES_ROOT + "/docker-compose.compat-{tag}.yml"
@@ -200,28 +203,32 @@ class DockerComposeMonitorCommercialSetup(DockerComposeNamespace):
 
 class DockerComposeDockerClientSetup(DockerComposeNamespace):
     def __init__(
-        self, name,
+        self,
+        name,
     ):
         DockerComposeNamespace.__init__(self, name, self.DOCKER_CLIENT_FILES)
 
 
 class DockerComposeRofsClientSetup(DockerComposeNamespace):
     def __init__(
-        self, name,
+        self,
+        name,
     ):
         DockerComposeNamespace.__init__(self, name, self.QEMU_CLIENT_ROFS_FILES)
 
 
 class DockerComposeLegacyV1ClientSetup(DockerComposeNamespace):
     def __init__(
-        self, name,
+        self,
+        name,
     ):
         DockerComposeNamespace.__init__(self, name, self.LEGACY_V1_CLIENT_FILES)
 
 
 class DockerComposeLegacyV3ClientSetup(DockerComposeNamespace):
     def __init__(
-        self, name,
+        self,
+        name,
     ):
         DockerComposeNamespace.__init__(self, name, self.LEGACY_V3_CLIENT_FILES)
 
@@ -237,7 +244,8 @@ class DockerComposeLegacyV3ClientSetup(DockerComposeNamespace):
 
 class DockerComposeSignedArtifactClientSetup(DockerComposeNamespace):
     def __init__(
-        self, name,
+        self,
+        name,
     ):
         DockerComposeNamespace.__init__(
             self, name, self.QEMU_CLIENT_FILES + self.SIGNED_ARTIFACT_CLIENT_FILES
@@ -246,7 +254,8 @@ class DockerComposeSignedArtifactClientSetup(DockerComposeNamespace):
 
 class DockerComposeShortLivedTokenSetup(DockerComposeNamespace):
     def __init__(
-        self, name,
+        self,
+        name,
     ):
         DockerComposeNamespace.__init__(
             self, name, self.QEMU_CLIENT_FILES + self.SHORT_LIVED_TOKEN_FILES
@@ -255,7 +264,8 @@ class DockerComposeShortLivedTokenSetup(DockerComposeNamespace):
 
 class DockerComposeFailoverServerSetup(DockerComposeNamespace):
     def __init__(
-        self, name,
+        self,
+        name,
     ):
         DockerComposeNamespace.__init__(
             self, name, self.QEMU_CLIENT_FILES + self.FAILOVER_SERVER_FILES
@@ -337,7 +347,8 @@ class DockerComposeEnterpriseSetupWithGateway(DockerComposeEnterpriseSetup):
 
     def start_tenant_mender_gateway(self, tenant):
         self._docker_compose_cmd(
-            "up -d mender-gateway", env={"TENANT_TOKEN": "%s" % tenant},
+            "up -d mender-gateway",
+            env={"TENANT_TOKEN": "%s" % tenant},
         )
         time.sleep(45)
 
@@ -459,46 +470,34 @@ class DockerComposeEnterpriseDockerClientSetup(DockerComposeEnterpriseSetup):
     def new_tenant_docker_client(self, name, tenant):
         logger.info("creating docker client connected to tenant: " + tenant)
         self._docker_compose_cmd(
-            "up -d --scale mender-client=1", env={"TENANT_TOKEN": "%s" % tenant},
+            "up -d --scale mender-client=1",
+            env={"TENANT_TOKEN": "%s" % tenant},
         )
         time.sleep(5)
 
 
 class DockerComposeCompatibilitySetup(DockerComposeNamespace):
-    def __init__(self, name, tag, enterprise=False):
+    def __init__(self, name, client_service, enterprise=False):
         self._enterprise = enterprise
-        extra_files = [self.COMPAT_FILES_TEMPLATE.format(tag=tag)]
+        extra_files = self.COMPAT_FILES
         if self._enterprise:
             extra_files += self.ENTERPRISE_FILES
+        self.client_service = client_service
         super().__init__(name, extra_files)
 
-    def client_services(self):
-        # In order for `ps --services` to return the services, the must have
-        # been created, but they don't need to be running.
-        self._docker_compose_cmd("up --no-start")
-        services = self._docker_compose_cmd("ps --services --all").split()
-        clients = []
-        for service in services:
-            if service.startswith("mender-client"):
-                clients.append(service)
-        return clients
-
     def setup(self):
-        compose_args = "up -d " + " ".join(
-            ["--scale %s=0" % service for service in self.client_services()]
-        )
+        compose_args = "up -d"
         self._docker_compose_cmd(compose_args)
         self._wait_for_containers()
 
     def populate_clients(self, name=None, tenant_token=""):
-        compose_cmd = "up -d " + " ".join(
-            ["--scale %s=1" % service for service in self.client_services()]
-        )
+        compose_cmd = f"up -d --scale {self.client_service}=1"
         if name is not None:
             compose_cmd += " --name '{name}'".format(name=name)
 
         self._docker_compose_cmd(
-            compose_cmd, env={"TENANT_TOKEN": "%s" % tenant_token},
+            compose_cmd,
+            env={"TENANT_TOKEN": "%s" % tenant_token},
         )
 
     def get_mender_clients(self, network="mender"):
@@ -524,18 +523,24 @@ class DockerComposeCompatibilitySetup(DockerComposeNamespace):
 
     @staticmethod
     def get_versions():
-        compose_file_prefix = "docker-compose.compat-"
-        compose_file_suffix = ".yml"
-        files = []
-        for (dirpath, dirnames, filenames) in walk(
-            DockerComposeNamespace.COMPAT_FILES_ROOT
-        ):
-            for f in filenames:
-                f = f[len(compose_file_prefix) :]
-                f = f[: -len(compose_file_suffix)]
-                files.append(f)
-            break
-        return files
+        services = subprocess.check_output(
+            ["docker-compose", "config", "--services"],
+            env=dict(
+                {
+                    "COMPOSE_FILE": ":".join(
+                        DockerComposeNamespace.BASE_FILES
+                        + DockerComposeNamespace.COMPAT_FILES
+                    )
+                },
+                **os.environ,
+            ),
+        )
+        return sorted(
+            filter(
+                lambda s: s.startswith("mender-client"),
+                services.decode("UTF-8").strip().split("\n"),
+            )
+        )
 
 
 class DockerComposeMTLSSetup(DockerComposeNamespace):
