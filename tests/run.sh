@@ -86,7 +86,7 @@ function get_requirements() {
     #       As a workaround, we're installing the debian package (noble distribution).
     EXTRACT_DIR=$(mktemp -d mender-artifact.XXXXXX)
     curl --fail \
-        https://downloads.mender.io/repos/debian/pool/main/m/mender-artifact/mender-artifact_3.11.2-1%2bubuntu%2bnoble_amd64.deb \
+        "https://downloads.mender.io/repos/debian/pool/main/m/mender-artifact/mender-artifact_${MENDER_ARTIFACT_VERSION:-3.11.2}-1%2bubuntu%2bnoble_amd64.deb" \
         -o "$EXTRACT_DIR/mender-artifact.deb"
     if [ $? -ne 0 ]; then
         echo "failed to download mender-artifact"
