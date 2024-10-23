@@ -5,7 +5,7 @@ test:integration:
   stage: test
   tags:
     - mender-qa-worker-integration-tests
-  timeout: 24h
+  timeout: 10h
   variables:
     PYTEST_XDIST_AUTO_NUM_WORKERS: "4"
   before_script:
