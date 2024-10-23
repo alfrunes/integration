@@ -388,6 +388,7 @@ def pytest_exception_interact(node, call, report):
                 "mender-monitor",
                 "mender-gateway",
                 "mender-client",
+                "mender",
             ]:
                 try:
                     logger.info("Printing %s systemd log, if possible:" % service)
