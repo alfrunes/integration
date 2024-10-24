@@ -46,3 +46,12 @@ test:integration:
   script:
     - cd tests
     - ./run.sh
+  artifacts:
+    expire_in: 2w
+    when: always
+    paths:
+      - tests/mender_test_logs
+      - tests/results_full_integration.xml
+      - tests/report_full_integration.html
+    reports:
+      junit: results_full_integration.xml
