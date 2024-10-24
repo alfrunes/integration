@@ -393,7 +393,9 @@ def pytest_exception_interact(node, call, report):
                 try:
                     logger.info("Printing %s systemd log, if possible:" % service)
                     run_remote_command(
-                        devices, "journalctl --unit %s || true" % service
+                        devices,
+                        "journalctl --unit=%s --output=cat --no-tail --no-pager --lines || true"
+                        % service,
                     )
                 except:
                     logger.info("Not able to print %s systemd log" % service)
